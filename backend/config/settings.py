@@ -16,8 +16,6 @@ from datetime import timedelta
 import os
 import dj_database_url
 
-import dotenv
-dotenv.load_dotenv()
 
 
 
