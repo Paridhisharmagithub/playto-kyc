@@ -13,7 +13,6 @@ User = get_user_model()
 # ---------------------------
 # SIGNUP VIEW
 # ---------------------------
-
 class SignupView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = SignupSerializer
@@ -34,7 +33,7 @@ class SignupView(generics.CreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Step 2: Save user safely
+        # Step 2: Save user (DEBUG ENABLED)
         try:
             user = serializer.save()
         except IntegrityError as e:
@@ -53,8 +52,7 @@ class SignupView(generics.CreateAPIView):
                 {
                     "error": {
                         "code": "SIGNUP_FAILED",
-                        "message": "Something went wrong during signup",
-                        "details": str(e),
+                        "message": str(e),  # 🔥 REAL ERROR WILL SHOW HERE
                     }
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -68,8 +66,7 @@ class SignupView(generics.CreateAPIView):
                 {
                     "error": {
                         "code": "TOKEN_ERROR",
-                        "message": "User created but token generation failed",
-                        "details": str(e),
+                        "message": str(e),
                     }
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -87,6 +84,8 @@ class SignupView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
 # ---------------------------
 # LOGIN VIEW
 # ---------------------------
@@ -97,7 +96,6 @@ class LoginView(APIView):
         username = request.data.get("username")
         password = request.data.get("password")
 
-        # Basic validation
         if not username or not password:
             return Response(
                 {
@@ -109,7 +107,6 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Authenticate user (SAFE way)
         user = authenticate(username=username, password=password)
 
         if user is None:
@@ -123,8 +120,18 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Create token
-        token, _ = Token.objects.get_or_create(user=user)
+        try:
+            token, _ = Token.objects.get_or_create(user=user)
+        except Exception as e:
+            return Response(
+                {
+                    "error": {
+                        "code": "TOKEN_ERROR",
+                        "message": str(e),
+                    }
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(
             {
