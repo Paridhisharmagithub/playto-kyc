@@ -13,6 +13,7 @@ User = get_user_model()
 # ---------------------------
 # SIGNUP VIEW
 # ---------------------------
+
 class SignupView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = SignupSerializer
@@ -20,7 +21,7 @@ class SignupView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
-        # Validate input
+        # Step 1: Validate input
         if not serializer.is_valid():
             return Response(
                 {
@@ -33,22 +34,48 @@ class SignupView(generics.CreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Step 2: Save user safely
         try:
             user = serializer.save()
-        except IntegrityError:
+        except IntegrityError as e:
             return Response(
                 {
                     "error": {
                         "code": "USER_EXISTS",
-                        "message": "Username already exists",
+                        "message": "Username or email already exists",
+                        "details": str(e),
                     }
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        except Exception as e:
+            return Response(
+                {
+                    "error": {
+                        "code": "SIGNUP_FAILED",
+                        "message": "Something went wrong during signup",
+                        "details": str(e),
+                    }
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
-        # Create token
-        token, _ = Token.objects.get_or_create(user=user)
+        # Step 3: Generate token
+        try:
+            token, _ = Token.objects.get_or_create(user=user)
+        except Exception as e:
+            return Response(
+                {
+                    "error": {
+                        "code": "TOKEN_ERROR",
+                        "message": "User created but token generation failed",
+                        "details": str(e),
+                    }
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
+        # Step 4: Success response
         return Response(
             {
                 "user": {
@@ -60,8 +87,6 @@ class SignupView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
-
-
 # ---------------------------
 # LOGIN VIEW
 # ---------------------------
