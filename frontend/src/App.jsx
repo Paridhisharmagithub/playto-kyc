@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useEffect } from "react";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
 
@@ -84,6 +85,12 @@ function App() {
       setError(err.message);
     }
   };
+
+  useEffect(() => {
+    if (session.token && session.role === "merchant") {
+      loadMerchantSubmission();
+    }
+  }, [session.token]);
 
   const signup = async () => {
     try {
