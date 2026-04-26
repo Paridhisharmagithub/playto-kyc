@@ -36,13 +36,13 @@ ALLOWED_HOSTS = ["*"]  # for now (simple for deploy)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://playto-kyc-ruby.vercel.app"
+    "https://playto-qosopqugf-paridhis-projects-066e3ee2.vercel.app"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://playto-kyc-ruby.vercel.app"
+    "https://playto-qosopqugf-paridhis-projects-066e3ee2.vercel.app"
 ]
 
 
@@ -102,6 +102,9 @@ DATABASES = {
 }
 
 
+CORS_ALLOW_HEADERS = ["*"]
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
