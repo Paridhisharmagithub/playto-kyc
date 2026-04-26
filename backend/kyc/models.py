@@ -36,7 +36,9 @@ class KYCSubmission(models.Model):
     bank_statement_document = models.FileField(
         upload_to="kyc_documents/", null=True, blank=True
     )
-    state = models.CharField(max_length=30, choices=State.choices, default=State.DRAFT)
+    state = models.CharField(
+        max_length=30, choices=State.choices, default=State.DRAFT, db_index=True
+    )
     reviewer_reason = models.TextField(blank=True)
     reviewed_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -45,7 +47,7 @@ class KYCSubmission(models.Model):
         blank=True,
         related_name="reviewed_submissions",
     )
-    submitted_at = models.DateTimeField(null=True, blank=True)
+    submitted_at = models.DateTimeField(null=True, blank=True, db_index=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

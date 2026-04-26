@@ -1,7 +1,5 @@
 # EXPLAINER
 
-This file explains how I built the challenge in a way I can defend in an interview.
-I am intentionally focusing on why each decision exists, not just what code I wrote.
 
 ---
 

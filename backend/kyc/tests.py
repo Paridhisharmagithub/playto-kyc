@@ -1,5 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.utils import timezone
+from datetime import timedelta
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
@@ -68,3 +71,30 @@ class KYCStateMachineAPITests(APITestCase):
             response.data["error"]["details"]["message"],
             "Reason is required for this action.",
         )
+
+    def test_merchant_upload_rejects_invalid_file_type(self):
+        merchant_token = Token.objects.create(user=self.submission.merchant)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {merchant_token.key}")
+
+        url = reverse("merchant-submission")
+        invalid_file = SimpleUploadedFile(
+            "malicious.exe", b"not-a-valid-doc", content_type="application/octet-stream"
+        )
+        response = self.client.patch(url, {"pan_document": invalid_file}, format="multipart")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data["error"]["details"]["pan_document"][0],
+            "Only PDF, JPG, and PNG files are allowed.",
+        )
+
+    def test_queue_item_at_risk_flag_after_24_hours(self):
+        self.submission.state = KYCSubmission.State.SUBMITTED
+        self.submission.submitted_at = timezone.now() - timedelta(hours=30)
+        self.submission.save(update_fields=["state", "submitted_at"])
+
+        url = reverse("reviewer-queue")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(response.data) > 0)
+        self.assertTrue(response.data[0]["at_risk"])

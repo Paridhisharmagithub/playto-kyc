@@ -22,6 +22,7 @@ python manage.py runserver
 ```
 
 Backend runs at `http://127.0.0.1:8000`.
+Note: local setup uses `DEBUG=True` for faster development. Set `DEBUG=False` and secure `ALLOWED_HOSTS` before production deployment.
 
 ## 2) Frontend setup
 
