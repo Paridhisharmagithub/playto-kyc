@@ -6,6 +6,8 @@ from PIL import Image, UnidentifiedImageError
 from rest_framework import serializers
 
 from kyc.models import KYCSubmission
+from kyc.state_machine import validate_transition
+
 
 ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png"}
 ALLOWED_CONTENT_TYPES = {"application/pdf", "image/jpeg", "image/png"}
