@@ -63,6 +63,8 @@ So if someone tries an illegal move (example: `submitted -> approved` directly),
 
 ---
 
+
+
 ## 2) The Upload
 
 Upload validation is done server-side in `kyc/serializers.py` (not trusted from frontend).
@@ -231,8 +233,6 @@ This ensured:
 
 ---
 
-## Short interview-style summary
 
-If I need to explain this quickly:
+I treated KYC state as a strict workflow and put transition rules in one file. Every state change goes through a service function, so illegal moves are blocked consistently. I validated uploads on the backend using size, extension, content type, and file signature checks. Reviewer queue is oldest-first, and SLA risk is computed dynamically (`now - submitted_at > 24h`) so it never goes stale. Auth is token + role-based, and merchant data access is scoped to `request.user`, so merchant A cannot read merchant B. I also caught and replaced AI-generated code that directly mutated state without transition checks.
 
-"I treated KYC state as a strict workflow and put transition rules in one file. Every state change goes through a service function, so illegal moves are blocked consistently. I validated uploads on the backend using size, extension, content type, and file signature checks. Reviewer queue is oldest-first, and SLA risk is computed dynamically (`now - submitted_at > 24h`) so it never goes stale. Auth is token + role-based, and merchant data access is scoped to `request.user`, so merchant A cannot read merchant B. I also caught and replaced AI-generated code that directly mutated state without transition checks."
