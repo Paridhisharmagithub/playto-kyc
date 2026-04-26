@@ -14,6 +14,7 @@ from pathlib import Path
 
 from datetime import timedelta
 import os
+import dj_database_url
 
 
 
@@ -35,13 +36,13 @@ ALLOWED_HOSTS = ["*"]  # for now (simple for deploy)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://playto-l656tjj0l-paridhis-projects-066e3ee2.vercel.app/"
+    "https://playto-kyc-ruby.vercel.app/"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://playto-l656tjj0l-paridhis-projects-066e3ee2.vercel.app/"
+    "https://playto-kyc-ruby.vercel.app/"
 ]
 
 
@@ -62,8 +63,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",   # 👈 FIRST
     "django.middleware.security.SecurityMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -71,6 +72,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
 
 ROOT_URLCONF = "config.urls"
 
@@ -92,8 +94,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 
-import os
-import dj_database_url
 
 DATABASES = {
     "default": dj_database_url.parse(
