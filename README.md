@@ -1,38 +1,41 @@
-# Playto KYC Pipeline Challenge
+# Playto KYC Pipeline 🚀
 
-A production-style KYC onboarding system that simulates how merchants submit verification details and how reviewers process them through a controlled workflow.
+A production-style KYC (Know Your Customer) onboarding system where merchants submit verification details and reviewers process them through a controlled workflow.
 
----
-
-## 🚀 Overview
-
-This project implements a complete KYC pipeline with:
-
-* Merchant onboarding (multi-step submission)
-* Document upload with strict validation
-* Reviewer queue and actions
-* Centralized state machine
-* SLA tracking (time-based risk flag)
-* Metrics for operational visibility
-* Role-based authentication (merchant vs reviewer)
-
-The focus is on **correctness, security, and clear system design**, not UI complexity.
+Built for the **Playto Founding Engineering Intern Challenge**.
 
 ---
 
-## 🏗️ System Architecture
+## 🌐 Live Demo
+👉 https://playto-kyc-ruby.vercel.app
 
-### Backend (Django + DRF)
+---
 
-* REST APIs under `/api/v1/`
-* Business logic centralized in services + state machine
-* Token-based authentication
-* SQLite (can be replaced with PostgreSQL)
+## 🧠 Overview
 
-### Frontend (React + Tailwind)
+This project simulates a real-world KYC pipeline with:
 
-* Minimal UI for merchant submission and reviewer dashboard
-* API-driven interaction
+- Multi-step merchant onboarding  
+- Secure document upload with strict validation  
+- Reviewer queue with controlled actions  
+- Centralized state machine for workflow enforcement  
+- SLA tracking and operational metrics  
+- Role-based authentication (Merchant vs Reviewer)  
+
+The focus is on **correctness, backend design, and production-like behavior**, not UI complexity.
+
+---
+
+## 🏗️ Tech Stack
+
+| Layer       | Technology                         |
+|------------|----------------------------------|
+| Backend     | Django + Django REST Framework   |
+| Frontend    | React (Vite) + Tailwind CSS      |
+| Database    | PostgreSQL (production) / SQLite |
+| Auth        | Token-based (DRF TokenAuth)      |
+| Deployment  | Vercel (frontend) + Render (backend) |
+| Container   | Docker + Docker Compose          |
 
 ---
 
@@ -45,127 +48,156 @@ draft → submitted → under_review → (approved | rejected | more_info_reques
 more_info_requested → submitted
 ```
 
-### Key Rules
+### 🔒 Rules
 
-* Merchants can edit only in `draft` or after `more_info_requested`
-* Submission must be complete before moving to `submitted`
-* Reviewers control all post-submission transitions
-* Illegal transitions are blocked at the API level
+- Merchants can edit only in `draft` or `more_info_requested`  
+- Submission must be complete before moving to `submitted`  
+- Reviewers control all post-submission transitions  
+- Invalid transitions return HTTP 400  
 
 ---
 
 ## 👤 Merchant Flow
 
-* Create or update KYC submission (draft)
-* Upload required documents:
-
-  * PAN
-  * Aadhaar
-  * Bank statement
-* Save progress anytime
-* Submit only when all required fields are filled
+- Create/update KYC submission (draft)  
+- Upload required documents:
+  - PAN  
+  - Aadhaar  
+  - Bank Statement  
+- Save progress anytime  
+- Submit only when all required fields are complete  
 
 ---
 
 ## 🧑‍💼 Reviewer Flow
 
-* View queue of submissions (oldest first)
-* Open full submission details
-* Perform actions:
-
-  * Start review
-  * Approve
-  * Reject (requires reason)
-  * Request more info (requires reason)
+- View queue (oldest first)  
+- Inspect full submission  
+- Perform actions:
+  - Start review  
+  - Approve  
+  - Reject (requires reason)  
+  - Request more info (requires reason)  
 
 ---
 
 ## 📂 File Upload Validation
 
-Validation is enforced on the backend:
+Strict backend validation:
 
-* Allowed types: `PDF`, `JPG`, `PNG`
-* Maximum size: `5 MB`
-* Checks include:
+- Allowed types: **PDF, JPG, PNG**  
+- Max size: **5 MB**  
 
-  * File extension
-  * Content type
-  * File signature (PDF header / image verification)
+Checks include:
 
-Invalid uploads are rejected with HTTP 400.
+- File extension  
+- Content type  
+- Magic bytes (file signature)  
+
+Invalid uploads → HTTP 400  
 
 ---
 
 ## ⏱️ SLA Tracking
 
-* Any submission in queue for **more than 24 hours** is flagged as `at_risk`
-* Computed dynamically (not stored in DB)
-* Ensures real-time accuracy
+- Submissions in queue for more than **24 hours** are flagged as `at_risk`  
+- Computed dynamically (not stored in DB)  
 
 ---
 
 ## 📊 Reviewer Metrics
 
-Available via `/api/v1/reviewer/metrics/`:
+Available via API:
 
-* Total submissions in queue
-* Average time in queue
-* Approval rate (last 7 days)
-
-All metrics are computed dynamically.
+- Total queue size  
+- Average wait time  
+- Approval rate (last 7 days)  
 
 ---
 
 ## 🔐 Authentication & Authorization
 
-* Token-based authentication (`DRF TokenAuth`)
-* Role-based access:
+- Token-based authentication (DRF)  
 
-  * `merchant`
-  * `reviewer`
+### Roles
+
+- `merchant`  
+- `reviewer`  
 
 ### Security Guarantees
 
-* Merchant can only access their own submission
-* Reviewer can access all submissions
-* No endpoint allows arbitrary submission access by merchants
+- Merchants can access **only their submissions**  
+- Reviewers can access **all submissions**  
+- No unauthorized access allowed  
 
 ---
 
 ## 🔗 API Endpoints
 
-All endpoints are prefixed with `/api/v1/`.
+All endpoints under `/api/v1/`
 
 ### Auth
 
-* `POST /auth/signup/`
-* `POST /auth/login/`
+```
+POST /auth/signup/
+POST /auth/login/
+```
 
 ### Merchant
 
-* `GET /merchant/submission/`
-* `PATCH /merchant/submission/`
-* `POST /merchant/submission/submit/`
+```
+GET /merchant/submission/
+PATCH /merchant/submission/
+POST /merchant/submission/submit/
+POST /merchant/submission/documents/
+```
 
 ### Reviewer
 
-* `GET /reviewer/queue/`
-* `GET /reviewer/metrics/`
-* `GET /reviewer/submissions/<id>/`
-* `POST /reviewer/submissions/<id>/action/`
+```
+GET /reviewer/queue/
+GET /reviewer/metrics/
+GET /reviewer/submissions/<id>/
+POST /reviewer/submissions/<id>/action/
+```
 
 ---
 
-## ⚙️ Setup Instructions
+## 🐳 Run with Docker (Recommended)
 
-### 1. Backend
+### Prerequisites
+
+- Docker Desktop installed  
+
+### Run
 
 ```bash
+docker compose up --build
+```
+
+### Access
+
+```
+http://localhost:8000
+```
+
+---
+
+## ⚙️ Manual Setup (Without Docker)
+
+### Backend
+
+```bash
+cd backend
+
 python -m venv .venv
 .venv\Scripts\activate
+
 pip install -r requirements.txt
+
 python manage.py migrate
 python manage.py seed_data
+
 python manage.py runserver
 ```
 
@@ -177,12 +209,12 @@ http://127.0.0.1:8000
 
 ---
 
-### 2. Frontend
+### Frontend
 
 ```bash
 cd frontend
+
 npm install
-copy .env.example .env
 npm run dev
 ```
 
@@ -194,25 +226,17 @@ http://127.0.0.1:5173
 
 ---
 
-## 👥 Seeded Users
+## 👥 Test Credentials
 
-* Reviewer:
-
-  * `reviewer1 / password123`
-
-* Merchant (draft):
-
-  * `merchant_draft / password123`
-
-* Merchant (under_review):
-
-  * `merchant_review / password123`
+| Role              | Username          | Password     |
+|------------------|------------------|-------------|
+| Reviewer         | reviewer1         | password123 |
+| Merchant (draft) | merchant_draft    | password123 |
+| Merchant (review)| merchant_review   | password123 |
 
 ---
 
 ## 🧪 Testing
-
-Run tests:
 
 ```bash
 python manage.py test
@@ -220,30 +244,27 @@ python manage.py test
 
 Includes:
 
-* API-level test verifying illegal state transition returns HTTP 400
+- API validation tests  
+- State transition checks  
 
 ---
 
 ## 🚢 Deployment
 
-This project can be deployed on:
+- Frontend → Vercel  
+- Backend → Render  
 
-* Railway
-* Render
-* Fly.io
+### Production Notes
 
-### Notes for production:
-
-* Set `DEBUG = False`
-* Configure media storage properly
-* Use PostgreSQL instead of SQLite
+- Set `DEBUG = False`  
+- Use PostgreSQL  
+- Configure media storage (S3 or cloud storage)  
 
 ---
 
 ## 🧠 Design Philosophy
 
-* Centralized business logic (state machine)
-* Backend as the source of truth
-* Defensive validation (files, auth, transitions)
-* Simple, readable, maintainable code
-* Focus on correctness over complexity
+- Centralized business logic using a state machine  
+- Backend as the single source of truth  
+- Strong validation and error handling  
+- Clean, maintainable, production-style code  
